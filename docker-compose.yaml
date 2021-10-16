@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_USER: issuebase
+      MYSQL_PASSWORD: issuebase
+      MYSQL_DATABASE: issuebase
+      MYSQL_ROOT_PASSWORD: issuebase
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+      - type: bind
+        source: ./up.sql
+        target: /up.sql
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+
+volumes:
+  db:
+    driver: local
