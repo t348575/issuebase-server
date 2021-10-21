@@ -21,6 +21,19 @@ services:
         limits:
           cpus: 2
 
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - type: bind
+        source: ./redis-conf.conf
+        target: /usr/local/etc/redis/redis.conf
+    entrypoint: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    deploy:
+      resources:
+        limits:
+          cpus: 2
 volumes:
   db:
     driver: local

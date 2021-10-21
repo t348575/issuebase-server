@@ -2,7 +2,7 @@ CREATE DATABASE  IF NOT EXISTS `issuebase` /*!40100 DEFAULT CHARACTER SET utf8mb
 USE `issuebase`;
 -- MySQL dump 10.13  Distrib 8.0.26, for Linux (x86_64)
 --
--- Host: localhost    Database: issuebase
+-- Host: 127.0.0.1    Database: issuebase
 -- ------------------------------------------------------
 -- Server version	8.0.26
 
@@ -112,7 +112,6 @@ CREATE TABLE `users` (
   `phone` varchar(13) NOT NULL,
   `name` varchar(64) NOT NULL,
   `password` varchar(256) NOT NULL,
-  `oauth_tokens` json NOT NULL,
   PRIMARY KEY (`username`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`),
@@ -129,4 +128,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-16 20:41:08
+-- Dump completed on 2021-10-21 16:45:04
