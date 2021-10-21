@@ -4,3 +4,4 @@
 *target
 *mysql*.jar
 lib
+*.iml
