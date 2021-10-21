@@ -111,7 +111,8 @@ CREATE TABLE `users` (
   `email` varchar(320) NOT NULL,
   `phone` varchar(13) NOT NULL,
   `name` varchar(64) NOT NULL,
-  `password` varchar(256) NOT NULL,
+  `password` varchar(256) DEFAULT NULL,
+  `social` json DEFAULT NULL,
   PRIMARY KEY (`username`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`),
@@ -128,4 +129,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-21 16:45:04
+-- Dump completed on 2021-10-21 23:43:49

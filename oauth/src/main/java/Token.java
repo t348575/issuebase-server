@@ -45,20 +45,10 @@ public class Token extends HttpServlet  {
             DecodedJWT jwt = verifier.verify(fullCode);
             String userId = jwt.getClaim("id").asString();
 
-            Date expiry = new Date();
-            expiry.setTime(expiry.getTime() + 900000);
-            Date idExpiry = new Date();
-            idExpiry.setTime(idExpiry.getTime() + 86400000);
+            Tokens tok = new Tokens();
+            tok.generateTokens(userId, this.redis, this.algo);
 
-            String idToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(idExpiry).withClaim("id", userId).sign(this.algo);
-            String accessToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(expiry).withClaim("id", userId).sign(this.algo);
-            String refreshToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(expiry).withClaim("id", userId).sign(this.algo);
-
-            this.redis.setex(idToken.substring(0, 16), 86400, idToken);
-            this.redis.setex(accessToken.substring(0, 16), 900, accessToken);
-            this.redis.setex(refreshToken.substring(0, 16), 900, refreshToken);
-
-            JsonWriter.writeJson(res, this.gson.toJson(new Tokens(idToken, accessToken, refreshToken)), 200);
+            JsonWriter.writeJson(res, this.gson.toJson(tok), 200);
         }
         catch(JWTVerificationException e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("invalid_request", "invalid or malformed code")), 400);
@@ -71,9 +61,22 @@ class Tokens {
     String access_token;
     String refresh_token;
 
-    Tokens(String id_token, String access_token, String refresh_token) {
-        this.id_token = id_token;
-        this.access_token = access_token;
-        this.refresh_token = refresh_token;
+    public void generateTokens(String username, Jedis redis, Algorithm algo) {
+        Date expiry = new Date();
+        expiry.setTime(expiry.getTime() + 900000);
+        Date idExpiry = new Date();
+        idExpiry.setTime(idExpiry.getTime() + 86400000);
+
+        String idToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(idExpiry).withClaim("id", username).sign(algo);
+        String accessToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(expiry).withClaim("id", username).sign(algo);
+        String refreshToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(expiry).withClaim("id", username).sign(algo);
+
+        redis.setex(idToken.substring(0, 16), 86400, idToken);
+        redis.setex(accessToken.substring(0, 16), 900, accessToken);
+        redis.setex(refreshToken.substring(0, 16), 900, refreshToken);
+
+        this.id_token = idToken;
+        this.access_token = accessToken;
+        this.refresh_token = refreshToken;
     }
 }
