@@ -2,3 +2,5 @@
 *.vscode
 *.idea
 *target
+*mysql*.jar
+lib
