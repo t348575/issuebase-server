@@ -16,10 +16,7 @@ services:
       - type: bind
         source: ./up.sql
         target: /up.sql
-    deploy:
-      resources:
-        limits:
-          cpus: 2
+
 
   redis:
     image: redis
@@ -30,10 +27,7 @@ services:
         source: ./redis-conf.conf
         target: /usr/local/etc/redis/redis.conf
     entrypoint: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    deploy:
-      resources:
-        limits:
-          cpus: 2
+
 volumes:
   db:
     driver: local
