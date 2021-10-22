@@ -5,3 +5,4 @@
 *mysql*.jar
 lib
 *.iml
+*-client.json
