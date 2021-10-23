@@ -27,6 +27,7 @@ public class CreateProject extends HttpServlet {
        
         String project_name=req.getParameter("project_name");
         String project_id=req.getParameter("project_id");
+
         Date date = new Date();
         try {
 
