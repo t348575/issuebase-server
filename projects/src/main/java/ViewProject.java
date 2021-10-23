@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.*;
 
 @WebServlet("/viewProject")
@@ -21,22 +22,32 @@ public class ViewProject extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String project_name=req.getParameter("project_name");
+        //String username=req.getParameter("username");
         try {
 
-            PreparedStatement statement = this.conn.prepareStatement("SELECT * from PROJECT where project_name = ?");
-            statement.setString(1, project_name);
+            PreparedStatement statement = this.conn.prepareStatement("SELECT * from project");
+            //statement.setString(1, username);
             ResultSet rs = statement.executeQuery();
+            String op = "";
             while (rs.next()){
-                System.out.println(rs);
+                op = op + rs.getString("project_name")+" \n ";
+                System.out.println(rs.getString("project_name"));
             }
-            //Avail av = new Avail();
-            //av.available = rs.next();
-            //JsonWriter.writeJson(res, this.gson.toJson(av), 200);
-        } catch (SQLException e) {
-            //JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
+            System.out.println(op);
+            res.setContentType("text/html");
+            PrintWriter out = res.getWriter();
+            out.println("<HTML>\n" +
+                    "<HEAD><TITLE>Hello</TITLE></HEAD>\n" +
+                    "<BODY BGCOLOR=\"#FDF5E6\">\n" +
+                    "<H1>"+op+"</H1>\n" +
+                    "</BODY></HTML>");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
+
     }
-}
+    }
+
+
 
 

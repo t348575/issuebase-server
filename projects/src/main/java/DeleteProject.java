@@ -26,17 +26,15 @@ public class DeleteProject extends HttpServlet {
 
             PreparedStatement statement = this.conn.prepareStatement("DELETE from project where project_name=?");
             statement.setString(1, project_name);
-            ResultSet rs = statement.executeQuery();
-            Avail av = new Avail();
-            av.available = rs.next();
+            statement.executeUpdate();
+            ResultSet rs = statement.executeQuery("SELECT * from project");
+            while (rs.next()){
+                System.out.println(rs.getString("project_name"));
+            }
             //JsonWriter.writeJson(res, this.gson.toJson(av), 200);
         } catch (SQLException e) {
             //JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
         }
     }
-}
-
-class Avail {
-    boolean available;
 }
 

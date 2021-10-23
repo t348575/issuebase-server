@@ -25,13 +25,13 @@ public class CreateProject extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
        
-        String project_name="blem";//req.getParameter("project_name");
-        Integer project_id=2;//req.getParameter("project_id");
+        String project_name=req.getParameter("project_name");
+        String project_id=req.getParameter("project_id");
         Date date = new Date();
         try {
 
             PreparedStatement statement = this.conn.prepareStatement("INSERT into project values(?,?,?)");
-            statement.setInt(1, project_id);
+            statement.setString(1, project_id);
             statement.setString(2, project_name);
             statement.setTimestamp(3, new Timestamp(date.getTime()));
 
