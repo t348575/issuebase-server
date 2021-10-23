@@ -27,11 +27,11 @@ public class ViewProject extends HttpServlet {
             PreparedStatement statement = this.conn.prepareStatement("SELECT * from PROJECT where project_name = ?");
             statement.setString(1, project_name);
             ResultSet rs = statement.executeQuery();
-            while (rs.next){
+            while (rs.next()){
                 System.out.println(rs);
             }
-            Avail av = new Avail();
-            av.available = rs.next();
+            //Avail av = new Avail();
+            //av.available = rs.next();
             //JsonWriter.writeJson(res, this.gson.toJson(av), 200);
         } catch (SQLException e) {
             //JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
@@ -39,7 +39,4 @@ public class ViewProject extends HttpServlet {
     }
 }
 
-class Avail {
-    boolean available;
-}
 

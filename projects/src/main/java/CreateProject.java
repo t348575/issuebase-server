@@ -1,10 +1,13 @@
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonWriter;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Date;
 
 @WebServlet("/createProject")
 public class CreateProject extends HttpServlet {
@@ -21,23 +24,22 @@ public class CreateProject extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String username = req.getParameter("username");
-
+       
+        String project_name="blem";//req.getParameter("project_name");
+        Integer project_id=2;//req.getParameter("project_id");
+        Date date = new Date();
         try {
-            PreparedStatement statement = this.conn.prepareStatement("INSERT into P values('','' ,'','')");
-            statement.setString(1, username);
 
-            ResultSet rs = statement.executeQuery();
+            PreparedStatement statement = this.conn.prepareStatement("INSERT into project values(?,?,?)");
+            statement.setInt(1, project_id);
+            statement.setString(2, project_name);
+            statement.setTimestamp(3, new Timestamp(date.getTime()));
 
-            Avail av = new Avail();
-            av.available = rs.next();
-            JsonWriter.writeJson(res, this.gson.toJson(av), 200);
+
+            int rs = statement.executeUpdate();
+            System.out.println(rs);
         } catch (SQLException e) {
-            JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
+            e.printStackTrace();
         }
     }
-}
-
-class Avail {
-    boolean available;
 }
