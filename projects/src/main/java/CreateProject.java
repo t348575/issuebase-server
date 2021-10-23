@@ -25,8 +25,8 @@ public class CreateProject extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
        
-        String project_name="blem";//req.getParameter("project_name");
-        Integer project_id=2;//req.getParameter("project_id");
+        String project_name=req.getParameter("project_name");
+        Integer project_id=req.getParameter("project_id");
         Date date = new Date();
         try {
 
