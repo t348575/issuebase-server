@@ -1,6 +1,6 @@
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import redis.clients.jedis.Jedis;
 
 import javax.servlet.annotation.WebServlet;
@@ -15,7 +15,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.Date;
 
 @WebServlet("/google")
 public class Google extends HttpServlet {
@@ -50,7 +49,8 @@ public class Google extends HttpServlet {
             statement.setString(1, email);
 
             ResultSet rs = statement.executeQuery();
-            if (token == null && !rs.next()) {
+            boolean state = rs.next();
+            if (phone == null && !state) {
                 JsonWriter.writeJson(res, this.gson.toJson(new NewUserRes(true)), 200);
                 return;
             }
@@ -66,49 +66,32 @@ public class Google extends HttpServlet {
                 JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("access_denied", "OAuth social credentials do not work")), 403);
                 return;
             }
-            String body = response.body();
-            GoogleUserInfo info = this.gson.fromJson(body, GoogleUserInfo.class);
 
-            statement = this.conn.prepareStatement("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?) ");
-            statement.setString(1, username);
-            statement.setString(2, email);
-            statement.setString(3, phone);
-            statement.setString(4, name);
-            statement.setString(5, "");
-            statement.setString(6, body);
+            JsonObject googleResBody = this.gson.fromJson(response.body(), JsonObject.class);
+            googleResBody.addProperty("access_token", token);
+
+            if (!state) {
+                statement = this.conn.prepareStatement("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?) ");
+                statement.setString(1, username);
+                statement.setString(2, email);
+                statement.setString(3, phone);
+                statement.setString(4, name);
+                statement.setString(5, "");
+                statement.setString(6, this.gson.toJson(googleResBody));
+            } else {
+                statement = this.conn.prepareStatement("UPDATE users SET social=? WHERE email=?");
+                statement.setString(1, this.gson.toJson(googleResBody));
+                statement.setString(2, email);
+            }
 
             statement.executeUpdate();
 
-            Tokens tok = new Tokens();
-            tok.generateTokens(username, this.redis, this.algo);
-
-            GoogleTokens googleRes = new GoogleTokens();
-            googleRes.id_token = tok.id_token;
-            googleRes.access_token = tok.access_token;
-            googleRes.refresh_token = tok.refresh_token;
+            NewUserTokens googleRes = new NewUserTokens();
+            googleRes.generateTokens(email, this.redis, this.algo);
 
             JsonWriter.writeJson(res, this.gson.toJson(googleRes), 200);
         } catch (SQLException | InterruptedException e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
         }
     }
-}
-
-class NewUserRes {
-    boolean new_user;
-
-    NewUserRes(boolean new_user) {
-        this.new_user = new_user;
-    }
-}
-
-class GoogleUserInfo {
-    String sub, name, given_name, family_name, picture, email, email_verified, locale;
-}
-
-class GoogleTokens {
-    boolean new_user = false;
-    String id_token;
-    String access_token;
-    String refresh_token;
 }

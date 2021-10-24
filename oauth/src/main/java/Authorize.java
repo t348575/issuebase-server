@@ -49,8 +49,8 @@ public class Authorize extends HttpServlet {
             statement.setString(3, username);
 
             ResultSet rs = statement.executeQuery();
-
-            if (!rs.next()) {
+            boolean state = rs.next();
+            if (!state) {
                 JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("access_denied", "The user does not exist!")), 403);
                 return;
             }
@@ -64,7 +64,7 @@ public class Authorize extends HttpServlet {
             expiry.setTime(expiry.getTime() + 60000);
             String codeToken = JWT.create().withIssuer("issuebase").withIssuedAt(new Date()).withExpiresAt(expiry).withClaim("id", username).sign(this.algo);
 
-            this.redis.setex(codeToken.substring(0, 16), 70, codeToken);
+            this.redis.setex(codeToken, 70, codeToken);
 
             if (redirectUri.contains("&")) {
                 res.sendRedirect(redirectUri + "&code=" + codeToken);
