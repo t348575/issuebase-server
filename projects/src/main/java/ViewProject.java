@@ -22,25 +22,16 @@ public class ViewProject extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        //String username=req.getParameter("username");
+        String project_id=req.getParameter("project_id");
         try {
-
-            PreparedStatement statement = this.conn.prepareStatement("SELECT * from project");
-            //statement.setString(1, username);
+            PreparedStatement statement = this.conn.prepareStatement("SELECT * from project where project_id=?");
+            statement.setString(1, project_id);
             ResultSet rs = statement.executeQuery();
             String op = "";
             while (rs.next()){
                 op = op + rs.getString("project_name")+" \n ";
-                System.out.println(rs.getString("project_name"));
             }
-            System.out.println(op);
-            res.setContentType("text/html");
-            PrintWriter out = res.getWriter();
-            out.println("<HTML>\n" +
-                    "<HEAD><TITLE>Hello</TITLE></HEAD>\n" +
-                    "<BODY BGCOLOR=\"#FDF5E6\">\n" +
-                    "<H1>"+op+"</H1>\n" +
-                    "</BODY></HTML>");
+            JsonWriter.writeJson(res,op,200);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
