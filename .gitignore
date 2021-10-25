@@ -6,7 +6,9 @@
 lib
 *.iml
 *-client.json
-setenv.sh
-settings.xml
 oauth/copy.xml
 tomcat.sh
+deploy/tomcat-users.xml
+deploy/settings.xml
+deploy/setenv.sh
+deploy/context.xml
