@@ -1,6 +1,7 @@
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import redis.clients.jedis.Jedis;
@@ -66,12 +67,19 @@ public class Authorize extends HttpServlet {
 
             this.redis.setex(codeToken, 70, codeToken);
 
-            if (redirectUri.contains("&")) {
-                res.sendRedirect(redirectUri + "&code=" + codeToken);
-                return;
+            if (req.getHeader("content-type").equals("application/json")) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("code", codeToken);
+                JsonWriter.writeJson(res, this.gson.toJson(obj), 200);
             }
+            else {
+                if (redirectUri.contains("&")) {
+                    res.sendRedirect(redirectUri + "&code=" + codeToken);
+                    return;
+                }
 
-            res.sendRedirect(redirectUri + "?code=" + codeToken);
+                res.sendRedirect(redirectUri + "?code=" + codeToken);
+            }
         } catch (SQLException e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
         }

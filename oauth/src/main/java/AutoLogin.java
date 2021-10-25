@@ -118,6 +118,12 @@ public class AutoLogin extends HttpServlet {
                 }
                 break;
             }
+            case "oauth": {
+                Tokens dataRes = new Tokens();
+                dataRes.generateTokens(username, this.redis, this.algo);
+
+                JsonWriter.writeJson(res, this.gson.toJson(dataRes), 200);
+            }
         }
     }
 }

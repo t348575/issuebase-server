@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.Set;
 
 @WebServlet("/token")
 public class Token extends HttpServlet  {
-    private Connection conn;
     private Gson gson = new Gson();
     private Algorithm algo;
     private Jedis redis;
@@ -67,7 +65,7 @@ class Tokens {
     String refresh_token;
 
     public void generateTokens(String username, Jedis redis, Algorithm algo) {
-        // Tokens.removeWithPattern(username + ":*", redis);
+        Tokens.removeWithPattern(username + ":*", redis);
 
         Date expiry = new Date();
         expiry.setTime(expiry.getTime() + 900000);
@@ -110,6 +108,24 @@ class Tokens {
     }
 
     public static String userFromToken(String token, Jedis redis) {
+        String res = Tokens.getKeyWithToken(token, redis);
+        return res.substring(0, res.indexOf(token) - 1);
+    }
+
+    public static boolean verify(String token, Jedis redis, Algorithm algo) {
+        try {
+            Tokens.getKeyWithToken(token, redis);
+
+            var verifier = JWT.require(algo).withIssuer("issuebase").build();
+            verifier.verify(token);
+            return true;
+        }
+        catch(Exception e) {
+            return false;
+        }
+    }
+
+    public static String getKeyWithToken(String token, Jedis redis) {
         Set<String> matchingKeys = new HashSet<>();
         ScanParams params = new ScanParams();
         params.match("*" + token);
@@ -124,8 +140,7 @@ class Tokens {
 
         } while(!nextCursor.equals("0"));
 
-        String total = matchingKeys.toArray(new String[matchingKeys.size()])[0];
-        return total.substring(0, total.indexOf(token) - 1);
+        return matchingKeys.toArray(new String[matchingKeys.size()])[0];
     }
 }
 

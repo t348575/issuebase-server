@@ -20,7 +20,7 @@ type Server struct {
 
 func main() {
 	
-	settingsFile, err := os.ReadFile("settings.xml")
+	settingsFile, err := os.ReadFile("deploy/settings.xml")
 
 	if err != nil {
 		log.Fatal(err)

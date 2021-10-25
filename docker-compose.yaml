@@ -4,6 +4,8 @@ services:
 
   db:
     image: mysql
+    networks:
+      - shared-net
     environment:
       MYSQL_USER: issuebase
       MYSQL_PASSWORD: issuebase
@@ -17,9 +19,10 @@ services:
         source: ./up.sql
         target: /up.sql
 
-
   redis:
     image: redis
+    networks:
+      - shared-net
     ports:
       - "6379:6379"
     volumes:
@@ -27,7 +30,31 @@ services:
         source: ./redis-conf.conf
         target: /usr/local/etc/redis/redis.conf
     entrypoint: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  
+  tomcat:
+    image: issuebase-tomcat:1
+    networks:
+      - shared-net
+    ports:
+      - "8080:8080"
+    volumes:
+      - type: bind
+        source: ./deploy/tomcat-users.xml
+        target: /usr/local/tomcat/conf/tomcat-users.xml
+      - type: bind
+        source: ./deploy/setenv.sh
+        target: /usr/local/tomcat/bin/setenv.sh
+      - type: bind
+        source: ./deploy/context.xml
+        target: /usr/local/tomcat/context.xml
+      - type: bind
+        source: ./deploy/settings.xml
+        target: /root/.m2/conf/settings.xml
 
 volumes:
   db:
     driver: local
+
+networks:
+  shared-net:
+    driver: bridge

@@ -3,12 +3,17 @@ docker-compose up -d
 
 sleep 5s
 
-mysql_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' issuebase-server-db-1)
+mysql_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' issuebase-server_db_1)
 
 connection_string="mysql -h $mysql_ip -u issuebase -pissuebase issuebase < /up.sql"
 
-docker exec -it "$(docker container ls  | grep 'issuebase-server-db-1' | awk '{print $1}')" sh -c "$connection_string"
+docker exec -it "$(docker container ls  | grep 'issuebase-server_db_1' | awk '{print $1}')" sh -c "$connection_string"
 
 echo issuebase-server_db_1 "$mysql_ip"
 
-echo issuebase-server_redis_1 "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' issuebase-server-db-1)"
+echo issuebase-server_redis_1 "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' issuebase-server_db_1)"
+
+docker exec -it "$(docker container ls | grep 'issuebase-server_tomcat_1' | awk '{print $1}')" sh -c "mv webapps webapps2 && mv webapps.dist/ webapps"
+docker exec -it "$(docker container ls | grep 'issuebase-server_tomcat_1' | awk '{print $1}')" sh -c "rm webapps/manager/META-INF/context.xml && mv context.xml webapps/manager/META-INF/context.xml"
+
+docker exec -it "$(docker container ls | grep 'issuebase-server_tomcat_1' | awk '{print $1}')" sh -c "cd /issuebase-server/oauth && mvn tomcat7:deploy"
