@@ -31,25 +31,25 @@ services:
         target: /usr/local/etc/redis/redis.conf
     entrypoint: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
   
-  tomcat:
-    image: issuebase-tomcat:1
-    networks:
-      - shared-net
-    ports:
-      - "8080:8080"
-    volumes:
-      - type: bind
-        source: ./deploy/tomcat-users.xml
-        target: /usr/local/tomcat/conf/tomcat-users.xml
-      - type: bind
-        source: ./deploy/setenv.sh
-        target: /usr/local/tomcat/bin/setenv.sh
-      - type: bind
-        source: ./deploy/context.xml
-        target: /usr/local/tomcat/context.xml
-      - type: bind
-        source: ./deploy/settings.xml
-        target: /root/.m2/conf/settings.xml
+#  tomcat:
+#    image: issuebase-tomcat:1
+#    networks:
+#      - shared-net
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - type: bind
+#        source: ./deploy/tomcat-users.xml
+#        target: /usr/local/tomcat/conf/tomcat-users.xml
+#      - type: bind
+#        source: ./deploy/setenv.sh
+#        target: /usr/local/tomcat/bin/setenv.sh
+#      - type: bind
+#        source: ./deploy/context.xml
+#        target: /usr/local/tomcat/context.xml
+#      - type: bind
+#        source: ./deploy/settings.xml
+#        target: /root/.m2/settings.xml
 
 volumes:
   db:

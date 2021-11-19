@@ -109,6 +109,11 @@
         <option name="VALUE" value="1" />
         <option name="IS_PREDEFINED" value="false" />
       </EnvironmentVariables>
+      <EnvironmentVariables>
+        <option name="NAME" value="github" />
+        <option name="VALUE" value="$PROJECT_DIR$/env/github-client.json" />
+        <option name="IS_PREDEFINED" value="false" />
+      </EnvironmentVariables>
     </ConfigurationWrapper>
     <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Profile">
       <option name="USE_ENV_VARIABLES" value="true" />
@@ -182,6 +187,11 @@
       <EnvironmentVariables>
         <option name="NAME" value="dev" />
         <option name="VALUE" value="1" />
+        <option name="IS_PREDEFINED" value="false" />
+      </EnvironmentVariables>
+      <EnvironmentVariables>
+        <option name="NAME" value="github" />
+        <option name="VALUE" value="$PROJECT_DIR$/env/github-client.json" />
         <option name="IS_PREDEFINED" value="false" />
       </EnvironmentVariables>
     </ConfigurationWrapper>
