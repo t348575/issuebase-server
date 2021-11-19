@@ -1,6 +1,5 @@
 import com.google.gson.Gson;
 import java.io.*;
-import org.json.JSONException;
 import org.json.JSONObject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -41,22 +40,31 @@ public class CreateProject extends HttpServlet {
     }
 
     public void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String project_id=req.getParameter("project_id");
         String project_name=req.getParameter("project_name");
         Date date = new Date();
         try {
+            var projNoStmt = this.conn.prepareStatement("SELECT COUNT(name) as cnt FROM projects");
+            ResultSet rs = projNoStmt.executeQuery();
+            System.out.println(rs);
+            if (!rs.next()){
+                System.out.println("here");
+            }
+            int projNo = rs.getInt("cnt") + 1;
+            PreparedStatement statement = this.conn.prepareStatement("INSERT into projects values(?,?,?)");
             String body = inputStreamToString(req.getInputStream());
             JSONObject obj = new JSONObject(body);
-            PreparedStatement statement = this.conn.prepareStatement("INSERT into projects values(?,?,?)");
-            statement.setString(1, obj.get("project_id").toString());
+            statement.setInt(1, projNo);
             statement.setString(2, obj.get("project_name").toString());
             statement.setTimestamp(3, new Timestamp(date.getTime()));
-
-
-            int rs = statement.executeUpdate();
-            res.setStatus(200);
+            statement.executeUpdate();
+            PreparedStatement proj_mem_statement = this.conn.prepareStatement("INSERT into project_members values(?,?,?)");
+            statement.setInt(1, projNo);
+            statement.setString(2, "username");
+            statement.setString(3, "role");
+           res.setStatus(200);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 }

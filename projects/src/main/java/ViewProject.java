@@ -22,14 +22,13 @@ public class ViewProject extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String project_id=req.getParameter("project_id");
+        //String project_id=req.getParameter("project_id");
         try {
-            PreparedStatement statement = this.conn.prepareStatement("SELECT * from project where project_id=?");
-            statement.setString(1, project_id);
+            PreparedStatement statement = this.conn.prepareStatement("SELECT * from projects");
             ResultSet rs = statement.executeQuery();
             String op = "";
             while (rs.next()){
-                op = op + rs.getString("project_name")+" \n ";
+                op = op + rs.getString("name")+" \n ";
             }
             JsonWriter.writeJson(res,op,200);
         } catch (SQLException throwables) {
