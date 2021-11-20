@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  db:
+    image: mysql
+    networks:
+      - shared-net
+    environment:
+      MYSQL_USER: issuebase
+      MYSQL_PASSWORD: issuebase
+      MYSQL_DATABASE: issuebase
+      MYSQL_ROOT_PASSWORD: issuebase
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+      - type: bind
+        source: ./up.sql
+        target: /up.sql
+
+  redis:
+    image: redis
+    networks:
+      - shared-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - type: bind
+        source: ./redis-conf.conf
+        target: /usr/local/etc/redis/redis.conf
+    entrypoint: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  shared-net:
+    driver: bridge
