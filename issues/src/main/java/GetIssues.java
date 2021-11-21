@@ -62,7 +62,7 @@ public class GetIssues extends HttpServlet {
         }
 
         if (deadline != -1) {
-            query += "deadline = ? AND ";
+            query += "deadline <= ? AND ";
         }
 
         query = query.substring(0, query.length() - 4);
@@ -118,7 +118,11 @@ public class GetIssues extends HttpServlet {
             }
 
             int total = countRs.getInt("cnt");
-            var issues = new Issue[total];
+            int items = 15;
+            if (total < items) {
+                items = total;
+            }
+            var issues = new Issue[items];
 
             i = 0;
             while (rs.next()) {
@@ -161,7 +165,6 @@ public class GetIssues extends HttpServlet {
         if (dir == null) {
             return "ASC";
         }
-
 
         if (dir.toLowerCase().equals("asc")) {
             return "ASC";

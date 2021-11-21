@@ -86,11 +86,12 @@ public class Google extends HttpServlet {
 
             statement.executeUpdate();
 
-            NewUserTokens googleRes = new NewUserTokens();
+            username = GetUsername.Get(this.conn, email);
+            NewUserTokens googleRes = new NewUserTokens(username);
             googleRes.generateTokens(email, this.redis, this.algo);
 
             JsonWriter.writeJson(res, this.gson.toJson(googleRes), 200);
-        } catch (SQLException | InterruptedException e) {
+        } catch (Exception e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
         }
     }

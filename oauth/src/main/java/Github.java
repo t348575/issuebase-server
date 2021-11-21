@@ -121,15 +121,15 @@ public class Github extends HttpServlet {
             }
 
             statement.executeUpdate();
-
-            GithubTokens githubRes = new GithubTokens();
+            username = GetUsername.Get(this.conn, data.email);
+            GithubTokens githubRes = new GithubTokens(username);
             githubRes.generateTokens(data.email, this.redis, this.algo);
             githubRes.imageUrl = data.avatar_url;
-            githubRes.username = data.email;
+            githubRes.username = username;
             githubRes.github_access_token = accessToken.access_token;
 
             JsonWriter.writeJson(res, this.gson.toJson(githubRes), 200);
-        } catch (InterruptedException | SQLException e) {
+        } catch (Exception e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("server_error", "An unknown database error occurred!")), 500);
         }
     }
@@ -148,7 +148,11 @@ class GithubData {
 }
 
 class GithubTokens extends NewUserTokens {
-    String imageUrl, username, github_access_token;
+    String imageUrl, github_access_token;
+
+    public GithubTokens(String username) {
+        super(username);
+    }
 }
 
 class GithubNewUser extends NewUserRes {
