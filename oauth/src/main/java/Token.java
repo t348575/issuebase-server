@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,11 +28,15 @@ public class Token extends HttpServlet  {
     private Algorithm algo;
     private Jedis redis;
     private JWTVerifier verifier;
+    private Connection conn;
 
     public void init() {
         try {
             this.algo = Algorithm.RSA256(Pem.readPublicKey(new File(String.valueOf(Paths.get(System.getenv("jwtPublicKey"))))), Pem.readPrivateKey(new File(String.valueOf(Paths.get(System.getenv("jwtPrivateKey"))))));
             this.verifier = JWT.require(this.algo).withIssuer("issuebase").build();
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            this.conn = DriverManager.getConnection(System.getenv("dbUrl"), System.getenv("dbUser"), System.getenv("dbPassword"));
 
             this.redis = new Jedis(System.getenv("redisHost"), Integer.parseInt(System.getenv("redisPort")));
             this.redis.auth(System.getenv("redisPassword"));
@@ -48,12 +54,12 @@ public class Token extends HttpServlet  {
             DecodedJWT jwt = verifier.verify(fullCode);
             String userId = jwt.getClaim("id").asString();
 
-            Tokens tok = new Tokens();
+            Tokens tok = new Tokens(GetUsername.Get(this.conn, userId));
             tok.generateTokens(userId, this.redis, this.algo);
 
             JsonWriter.writeJson(res, this.gson.toJson(tok), 200);
         }
-        catch(JWTVerificationException e) {
+        catch(Exception e) {
             JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("invalid_request", "invalid or malformed code")), 400);
         }
     }
@@ -63,6 +69,11 @@ class Tokens {
     String id_token;
     String access_token;
     String refresh_token;
+    String username;
+
+    public Tokens(String username) {
+        this.username = username;
+    }
 
     public void generateTokens(String username, Jedis redis, Algorithm algo) {
         Tokens.removeWithPattern(username + ":*", redis);
@@ -125,6 +136,17 @@ class Tokens {
         }
     }
 
+    public static String getEmail(String token, Algorithm algo) {
+        try {
+            var verifier = JWT.require(algo).withIssuer("issuebase").build();
+            var rs = verifier.verify(token);
+            return rs.getClaim("id").asString();
+        }
+        catch(Exception e) {
+            return "";
+        }
+    }
+
     public static String getKeyWithToken(String token, Jedis redis) {
         Set<String> matchingKeys = new HashSet<>();
         ScanParams params = new ScanParams();
@@ -154,4 +176,8 @@ class NewUserRes {
 
 class NewUserTokens extends Tokens {
     boolean new_user = false;
+
+    public NewUserTokens(String username) {
+        super(username);
+    }
 }

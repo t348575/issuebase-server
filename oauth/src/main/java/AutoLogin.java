@@ -70,11 +70,11 @@ public class AutoLogin extends HttpServlet {
 
                     statement.executeUpdate();
 
-                    Tokens dataRes = new Tokens();
+                    Tokens dataRes = new Tokens(GetUsername.Get(this.conn, username));
                     dataRes.generateTokens(username, this.redis, this.algo);
 
                     JsonWriter.writeJson(res, this.gson.toJson(dataRes), 200);
-                } catch (InterruptedException | SQLException e) {
+                } catch (Exception e) {
                     JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("access_denied", "OAuth social credentials do not work")), 403);
                     return;
                 }
@@ -103,7 +103,7 @@ public class AutoLogin extends HttpServlet {
                     JsonObject finalRes = this.gson.fromJson(rs.getString("social"), JsonObject.class);
                     finalRes.addProperty("github_access_token", finalRes.getAsJsonPrimitive("access_token").getAsString());
 
-                    Tokens dataRes = new Tokens();
+                    Tokens dataRes = new Tokens(GetUsername.Get(this.conn, username));
                     dataRes.generateTokens(username, this.redis, this.algo);
 
                     finalRes.addProperty("username", rs.getString("username"));
@@ -112,17 +112,21 @@ public class AutoLogin extends HttpServlet {
                     finalRes.addProperty("refresh_token", dataRes.refresh_token);
 
                     JsonWriter.writeJson(res, this.gson.toJson(finalRes), 200);
-                } catch (InterruptedException | SQLException e) {
+                } catch (Exception e) {
                     JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("access_denied", "OAuth social credentials do not work")), 403);
                     return;
                 }
                 break;
             }
             case "oauth": {
-                Tokens dataRes = new Tokens();
-                dataRes.generateTokens(username, this.redis, this.algo);
+                try {
+                    Tokens dataRes = new Tokens(GetUsername.Get(this.conn, username));
+                    dataRes.generateTokens(username, this.redis, this.algo);
 
-                JsonWriter.writeJson(res, this.gson.toJson(dataRes), 200);
+                    JsonWriter.writeJson(res, this.gson.toJson(dataRes), 200);
+                } catch (Exception e) {
+                    JsonWriter.writeJson(res, this.gson.toJson(new OAuthError("access_denied", "Could not find user")), 403);
+                }
             }
         }
     }

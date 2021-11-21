@@ -42,7 +42,7 @@ public class Refresh extends HttpServlet  {
             try {
                 Tokens.getKeyWithToken(accessToken, this.redis);
 
-                Tokens dataRes = new Tokens();
+                Tokens dataRes = new Tokens(GetUsername.Get(this.conn, Tokens.getEmail(idToken, this.algo)));
                 dataRes.generateTokens(Tokens.userFromToken(idToken, this.redis), this.redis, this.algo);
 
                 JsonWriter.writeJson(res, this.gson.toJson(dataRes), 200);

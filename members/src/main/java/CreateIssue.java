@@ -87,7 +87,7 @@ public class CreateIssue extends HttpServlet {
             }
             issueTags.executeBatch();
 
-            JsonWriter.writeJson(res, this.gson.toJson(new JsonError("none")), 200);
+            res.setStatus(200);
         } catch (SQLException e) {
             JsonWriter.writeJson(res, this.gson.toJson(e), 400);
         }

@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-var modules = []string{"oauth", "projects"}
+var modules = []string{"oauth", "projects", "issues"}
 
 type Settings struct {
 	Servers []Server `xml:"servers>server"`
