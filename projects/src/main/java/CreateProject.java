@@ -41,6 +41,8 @@ public class CreateProject extends HttpServlet {
 
     public void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String project_name=req.getParameter("project_name");
+        String username = (String) req.getAttribute("username");
+        String role=req.getParameter("role");
         Date date = new Date();
         try {
             var projNoStmt = this.conn.prepareStatement("SELECT COUNT(name) as cnt FROM projects");
@@ -59,8 +61,8 @@ public class CreateProject extends HttpServlet {
             statement.executeUpdate();
             PreparedStatement proj_mem_statement = this.conn.prepareStatement("INSERT into project_members values(?,?,?)");
             statement.setInt(1, projNo);
-            statement.setString(2, "username");
-            statement.setString(3, "role");
+            statement.setString(2, username);
+            statement.setString(3, role);
            res.setStatus(200);
         } catch (SQLException e) {
             e.printStackTrace();
