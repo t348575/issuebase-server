@@ -12,3 +12,4 @@ deploy/tomcat-users.xml
 deploy/settings.xml
 deploy/setenv.sh
 deploy/context.xml
+setup.sh

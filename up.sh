@@ -1,4 +1,3 @@
-#!/bin/bash
 
 if [ "$1" == "-t" ]
 then
@@ -7,7 +6,7 @@ else
     docker-compose -f docker-compose-standard.yaml up -d
 fi
 
-if grep -q Microsoft /proc/version; then
+if grep -q microsoft /proc/version; then
   name=issuebase-server-db-1
 else
   name=issuebase-server_db_1
