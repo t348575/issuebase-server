@@ -6,27 +6,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.time.Instant;
 import java.util.Date;
 
 @WebServlet("/createProject")
 public class CreateProject extends HttpServlet {
-
-    public static String inputStreamToString(InputStream is) throws IOException {
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-        StringWriter sw = new StringWriter();
-        char c[] = new char[1024];
-        while (true) {
-            int n = br.read(c, 0, c.length);
-            if (n < 0)
-                break;
-            sw.write(c, 0, n);
-        }
-        isr.close();
-        return sw.toString();
-    }
-
     private Connection conn;
     private Gson gson = new Gson();
 
@@ -39,34 +25,41 @@ public class CreateProject extends HttpServlet {
         }
     }
 
-    public void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String project_name=req.getParameter("project_name");
-        String username = (String) req.getAttribute("username");
-        String role=req.getParameter("role");
-        Date date = new Date();
+    public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try {
-            var projNoStmt = this.conn.prepareStatement("SELECT COUNT(name) as cnt FROM projects");
-            ResultSet rs = projNoStmt.executeQuery();
-            System.out.println(rs);
-            if (!rs.next()){
-                System.out.println("here");
-            }
-            int projNo = rs.getInt("cnt") + 1;
-            PreparedStatement statement = this.conn.prepareStatement("INSERT into projects values(?,?,?)");
-            String body = inputStreamToString(req.getInputStream());
-            JSONObject obj = new JSONObject(body);
-            statement.setInt(1, projNo);
-            statement.setString(2, obj.get("project_name").toString());
-            statement.setTimestamp(3, new Timestamp(date.getTime()));
+            InputStream body = req.getInputStream();
+            CreateProjectFields fields = this.gson.fromJson(new String(body.readAllBytes(), StandardCharsets.UTF_8), CreateProjectFields.class);
+            PreparedStatement statement = this.conn.prepareStatement("INSERT INTO projects(name, created_at) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, fields.project_name);
+            statement.setTimestamp(2, Timestamp.from(Instant.now()));
+            
             statement.executeUpdate();
-            PreparedStatement proj_mem_statement = this.conn.prepareStatement("INSERT into project_members values(?,?,?)");
-            statement.setInt(1, projNo);
-            statement.setString(2, username);
-            statement.setString(3, role);
-           res.setStatus(200);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
+            var rs = statement.getGeneratedKeys();
+            if (!rs.next()) {
+                JsonWriter.writeJson(res, this.gson.toJson(new JsonError("unknown_error")), 500);
+                return;
+            }
+
+            long newId = rs.getLong(1);
+
+            var projectUsers = this.conn.prepareStatement("INSERT INTO project_members(project_id, username, role) VALUES (?, ?, ?)");
+            for (String temp: fields.users) {
+                projectUsers.setLong(1, newId);
+                projectUsers.setString(2, temp);
+                projectUsers.setInt(3, 1);
+                projectUsers.addBatch();
+            }
+            projectUsers.executeBatch();
+
+            JsonWriter.writeJson(res, this.gson.toJson(new JsonError("none")), 200);
+        } catch (SQLException e) {
+            JsonWriter.writeJson(res, this.gson.toJson(e), 400);
+        }
     }
+}
+
+class CreateProjectFields {
+    String project_name;
+    String[] users;
 }

@@ -28,21 +28,21 @@ public class JwtMiddleware implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            var authHeader = ((HttpServletRequest) servletRequest).getHeader("Authorization");
-            var tokenSplit = authHeader.split("Bearer ");
-
-            if (tokenSplit.length != 2) {
-                ((HttpServletResponse) servletResponse).sendError(401);
-                return;
-            }
-
-            DecodedJWT jwt = verifier.verify(tokenSplit[1]);
-            servletRequest.setAttribute("username", jwt.getClaim("username"));
-        } catch (JWTVerificationException exception){
-            ((HttpServletResponse) servletResponse).sendError(403);
-            return;
-        }
+//        try {
+//            var authHeader = ((HttpServletRequest) servletRequest).getHeader("Authorization");
+//            var tokenSplit = authHeader.split("Bearer ");
+//
+//            if (tokenSplit.length != 2) {
+//                ((HttpServletResponse) servletResponse).sendError(401);
+//                return;
+//            }
+//
+//            DecodedJWT jwt = verifier.verify(tokenSplit[1]);
+//            servletRequest.setAttribute("username", jwt.getClaim("id"));
+//        } catch (JWTVerificationException exception){
+//            ((HttpServletResponse) servletResponse).sendError(403);
+//            return;
+//        }
         filterChain.doFilter(servletRequest, servletResponse);
     }
 }
